@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Resultado do Relatório - Gestão Hoffman{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1>{{ relatorio.titulo }}</h1>
+        
+        <div class="card mt-3">
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Criado em:</th>
+                        <td>{{ relatorio.created_at|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Criado por:</th>
+                        <td>{{ relatorio.usuario.user.username }}</td>
+                    </tr>
+                </table>
+                
+                <h3>Conteúdo</h3>
+                <div style="white-space: pre-wrap;">{{ relatorio.conteudo }}</div>
+                
+                <div class="btn-group mt-3" role="group">
+                    <a href="{% url 'gestor-dashboard' %}" class="btn btn-secondary">Voltar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

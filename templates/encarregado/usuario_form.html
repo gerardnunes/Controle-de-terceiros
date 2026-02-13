@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{% if form.instance.pk %}Editar{% else %}Novo{% endif %} Usuário</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a href="{% url 'usuario_list' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

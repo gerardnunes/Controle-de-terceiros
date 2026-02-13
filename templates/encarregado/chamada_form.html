@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Nova Chamada</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <h4>Selecione os usuários presentes</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Presente?</th>
+                <th>Usuário</th>
+                <th>Local</th>
+                <th>Hora Chegada</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td><input type="checkbox" name="usuarios" value="{{ usuario.id }}"></td>
+                <td>{{ usuario.first_name }}</td>
+                <td>
+                    <select name="local_{{ usuario.id }}" class="form-control">
+                        <option value="">Selecione</option>
+                        {% for local in locais %}
+                        <option value="{{ local.id }}">{{ local.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="time" name="hora_{{ usuario.id }}" class="form-control"></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Registrar Chamada</button>
+    <a href="{% url 'chamada_list' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

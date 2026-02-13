@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dashboard do Gerente</h2>
+<h3>Chamadas Pendentes</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Encarregado</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for chamada in chamadas %}
+        <tr>
+            <td>{{ chamada.data|date:"d/m/Y" }}</td>
+            <td>{{ chamada.encarregado.first_name }}</td>
+            <td><a href="{% url 'gerente_chamada_detail' chamada.id %}" class="btn btn-sm btn-primary">Analisar</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">Nenhuma chamada pendente.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

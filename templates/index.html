@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Sistema de Gestão Hoffman</h1>
+    <p class="lead">Controle de terceiros com aprovação de chamadas diárias.</p>
+    <hr class="my-4">
+    <p>Faça login para acessar suas funcionalidades.</p>
+    {% if not user.is_authenticated %}
+        <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">Login</a>
+        <a class="btn btn-secondary btn-lg" href="{% url 'register' %}" role="button">Registrar</a>
+    {% endif %}
+</div>
+{% endblock %}

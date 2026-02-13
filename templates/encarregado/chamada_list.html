@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Chamadas Realizadas</h2>
+<a href="{% url 'chamada_create' %}" class="btn btn-primary mb-3">Nova Chamada</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Status</th>
+            <th>Criada em</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for chamada in chamadas %}
+        <tr>
+            <td>{{ chamada.data|date:"d/m/Y" }}</td>
+            <td>{{ chamada.get_status_display }}</td>
+            <td>{{ chamada.criado_em|date:"d/m/Y H:i" }}</td>
+            <td><a href="{% url 'chamada_detail' chamada.id %}" class="btn btn-sm btn-info">Detalhes</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Nenhuma chamada encontrada.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

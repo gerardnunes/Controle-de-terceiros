@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dashboard do Encarregado</h2>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Usuários Pendentes</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ pendentes }}</h5>
+                <a href="{% url 'usuario_list' %}" class="btn btn-light">Ver pendentes</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Chamada de Hoje</div>
+            <div class="card-body">
+                {% if chamada_hoje %}
+                    <p>Status: {{ chamada_hoje.get_status_display }}</p>
+                    <a href="{% url 'chamada_detail' chamada_hoje.id %}" class="btn btn-light">Ver chamada</a>
+                else %}
+                    <p>Nenhuma chamada para hoje.</p>
+                    <a href="{% url 'chamada_create' %}" class="btn btn-light">Criar chamada</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

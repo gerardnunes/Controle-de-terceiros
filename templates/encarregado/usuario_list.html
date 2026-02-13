@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Usuários</h2>
+<a href="{% url 'usuario_create' %}" class="btn btn-primary mb-3">Novo Usuário</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Username</th>
+            <th>CPF</th>
+            <th>Aprovado</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for usuario in usuarios %}
+        <tr>
+            <td>{{ usuario.first_name }}</td>
+            <td>{{ usuario.username }}</td>
+            <td>{{ usuario.cpf }}</td>
+            <td>
+                {% if usuario.aprovado %}
+                    <span class="badge bg-success">Sim</span>
+                {% else %}
+                    <span class="badge bg-warning">Não</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if not usuario.aprovado %}
+                    <a href="{% url 'usuario_aprovar' usuario.id %}" class="btn btn-sm btn-success">Aprovar</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

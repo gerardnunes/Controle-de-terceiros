@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Locais de Trabalho</h2>
+<a href="{% url 'local_create' %}" class="btn btn-primary mb-3">Novo Local</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for local in locais %}
+        <tr>
+            <td>{{ local.nome }}</td>
+            <td>{{ local.descricao }}</td>
+            <td>
+                <a href="{% url 'local_edit' local.id %}" class="btn btn-sm btn-warning">Editar</a>
+                <a href="{% url 'local_delete' local.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Remover</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

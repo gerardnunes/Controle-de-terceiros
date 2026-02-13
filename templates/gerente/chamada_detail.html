@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Chamada de {{ chamada.data|date:"d/m/Y" }}</h2>
+<p><strong>Encarregado:</strong> {{ chamada.encarregado.first_name }}</p>
+<p><strong>Status atual:</strong> {{ chamada.get_status_display }}</p>
+<h4>Presenças</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Usuário</th>
+            <th>Local</th>
+            <th>Hora Chegada</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in presencas %}
+        <tr>
+            <td>{{ p.usuario.first_name }}</td>
+            <td>{{ p.local.nome }}</td>
+            <td>{{ p.hora_chegada|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if chamada.status == 'pendente' %}
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="acao" value="aprovar" class="btn btn-success">Aprovar</button>
+    <button type="submit" name="acao" value="rejeitar" class="btn btn-danger">Rejeitar</button>
+</form>
+{% endif %}
+<a href="{% url 'dashboard' %}" class="btn btn-secondary">Voltar</a>
+{% endblock %}

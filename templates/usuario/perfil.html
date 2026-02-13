@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Meu Perfil</h2>
+<p><strong>Nome:</strong> {{ user.first_name }}</p>
+<p><strong>Username:</strong> {{ user.username }}</p>
+<p><strong>CPF:</strong> {{ user.cpf|default:"Não informado" }}</p>
+<p><strong>Telefone:</strong> {{ user.telefone|default:"Não informado" }}</p>
+<p><strong>Endereço:</strong> {{ user.endereco|default:"Não informado" }}</p>
+<p><strong>Aprovado:</strong> {% if user.aprovado %}Sim{% else %}Não (aguardando aprovação){% endif %}</p>
+{% if user.aprovado %}
+    <p><strong>Aprovado por:</strong> {{ user.aprovado_por.first_name }} em {{ user.aprovado_em|date:"d/m/Y H:i" }}</p>
+{% endif %}
+<hr>
+<h3>Histórico de Presenças</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Local</th>
+            <th>Hora Chegada</th>
+            <th>Hora Saída</th>
+            <th>Status Chamada</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for presenca in user.presencas.all %}
+        <tr>
+            <td>{{ presenca.chamada.data|date:"d/m/Y" }}</td>
+            <td>{{ presenca.local.nome }}</td>
+            <td>{{ presenca.hora_chegada|default:"-" }}</td>
+            <td>{{ presenca.hora_saida|default:"-" }}</td>
+            <td>{{ presenca.chamada.get_status_display }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Nenhum registro encontrado.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

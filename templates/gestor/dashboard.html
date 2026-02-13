@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dashboard do Gestor</h2>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">Usuários</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ total_usuarios }}</h5>
+                <a href="{% url 'gestor_usuario_list' %}" class="btn btn-light">Gerenciar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Relatórios</div>
+            <div class="card-body">
+                <a href="{% url 'relatorio' %}" class="btn btn-light">Acessar</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

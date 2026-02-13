@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Gerenciar Usuários</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Nome</th>
+            <th>Perfil</th>
+            <th>Aprovado</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in usuarios %}
+        <tr>
+            <td>{{ u.username }}</td>
+            <td>{{ u.first_name }}</td>
+            <td>{{ u.get_role_display }}</td>
+            <td>{% if u.aprovado %}Sim{% else %}Não{% endif %}</td>
+            <td><a href="{% url 'gestor_usuario_edit' u.id %}" class="btn btn-sm btn-warning">Editar</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

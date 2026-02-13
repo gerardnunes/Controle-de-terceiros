@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Relatório de {{ inicio|date:"d/m/Y" }} a {{ fim|date:"d/m/Y" }}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Usuário</th>
+            <th>Dias Trabalhados</th>
+            <th>Valor (R$)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in dados %}
+        <tr>
+            <td>{{ item.first_name }}</td>
+            <td>{{ item.dias }}</td>
+            <td>{{ item.valor }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">Nenhum dado encontrado no período.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'relatorio' %}" class="btn btn-secondary">Novo Relatório</a>
+{% endblock %}

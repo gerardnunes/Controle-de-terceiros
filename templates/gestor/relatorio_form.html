@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Formulário de Relatório - Gestão Hoffman{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1>Gerar Relatório</h1>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group mb-3">
+                <label for="{{ form.titulo.id_for_label }}">Título</label>
+                {{ form.titulo }}
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="{{ form.conteudo.id_for_label }}">Conteúdo</label>
+                {{ form.conteudo }}
+            </div>
+            
+            <div class="btn-group" role="group">
+                <button type="submit" class="btn btn-success">Gerar Relatório</button>
+                <a href="{% url 'gestor-dashboard' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
