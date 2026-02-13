@@ -264,3 +264,82 @@ def redirect_dashboard(request):
 
     else:
         return redirect('home')
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render
+from django.db.models import Count, Q
+from django.utils import timezone
+from datetime import timedelta
+from .models import User, Chamada, Presenca
+
+def is_encarregado(user):
+    return user.is_authenticated and user.role == 'encarregado'
+
+@login_required
+@user_passes_test(is_encarregado)
+def dashboard_encarregado(request):
+    hoje = timezone.now().date()
+
+    # 1. Usuários pendentes (usuários com role='usuario' e aprovado=False)
+    pendentes = User.objects.filter(role='usuario', aprovado=False).count()
+
+    # 2. Chamada de hoje (criada por este encarregado)
+    chamada_hoje = Chamada.objects.filter(data=hoje, encarregado=request.user).first()
+
+    # 3. Usuários ativos trabalhando hoje (presenças na chamada de hoje)
+    ativos_hoje = 0
+    if chamada_hoje:
+        ativos_hoje = chamada_hoje.presencas.count()
+
+    # 4. Usuários por setor (supondo que existe campo 'setor' ou 'groups')
+    # Vamos tentar usar groups se existirem, senão, será necessário adaptar
+    setores = []
+    if hasattr(User, 'setor'):
+        setores = User.objects.values('setor').annotate(total=Count('id')).order_by('setor')
+    else:
+        # Fallback: usar groups
+        from django.contrib.auth.models import Group
+        grupos = Group.objects.annotate(total=Count('user')).values('name', 'total')
+        setores = [{'setor': g['name'], 'total': g['total']} for g in grupos]
+
+    # 5. Tempo de empresa de cada usuário (usando date_joined)
+    usuarios_tempo = User.objects.filter(is_active=True).values('username', 'date_joined')
+    for u in usuarios_tempo:
+        delta = hoje - u['date_joined'].date()
+        u['tempo_anos'] = delta.days // 365
+        u['tempo_meses'] = (delta.days % 365) // 30
+        u['nome'] = u['username']  # para exibição
+
+    # 6. Frequência de presença (últimos 30 dias)
+    data_limite = hoje - timedelta(days=30)
+    # Chamadas no período (aprovadas? talvez considerar apenas chamadas com status 'aprovado' ou todas)
+    chamadas_periodo = Chamada.objects.filter(data__gte=data_limite)
+    # Para cada usuário ativo, contar em quantos dias diferentes ele teve presença
+    # Precisamos considerar que um usuário pode estar em múltiplas chamadas no mesmo dia, mas queremos dias distintos
+    frequencias = []
+    usuarios_ativos = User.objects.filter(is_active=True)
+    for usuario in usuarios_ativos:
+        # Presenças do usuário no período, com chamadas dentro do período
+        presencas = Presenca.objects.filter(
+            usuario=usuario,
+            chamada__data__gte=data_limite
+        ).values_list('chamada__data', flat=True).distinct()
+        dias_presentes = presencas.count()
+        total_dias_periodo = chamadas_periodo.dates('data', 'day').count()  # dias com chamada no período
+        percentual = (dias_presentes / total_dias_periodo * 100) if total_dias_periodo > 0 else 0
+        frequencias.append({
+            'nome': usuario.username,
+            'presentes': dias_presentes,
+            'total_dias': total_dias_periodo,
+            'percentual': round(percentual, 1)
+        })
+
+    context = {
+        'pendentes': pendentes,
+        'chamada_hoje': chamada_hoje,
+        'ativos_hoje': ativos_hoje,
+        'setores': setores,
+        'usuarios_tempo': usuarios_tempo,
+        'frequencias': frequencias,
+    }
+    return render(request, 'dashboard_encarregado.html', context)
