@@ -20,4 +20,72 @@
         </div>
     </div>
 </div>
+<div class="tab-content" id="myTabContent">
+    <!-- Aba Visão Geral -->
+    <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+      <div class="row mt-3">
+        <div class="col-md-4">
+          <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Usuários Pendentes</div>
+            <div class="card-body">
+              <h5 class="card-title">{{ pendentes }}</h5>
+              <a href="{% url 'usuario_list' %}" class="btn btn-light">Ver pendentes</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-white bg-success mb-3">
+            <div class="card-header">Ativos Trabalhando Hoje</div>
+            <div class="card-body">
+              <h5 class="card-title">{{ ativos_hoje }}</h5>
+              {% if chamada_hoje %}
+                <a href="{% url 'chamada_detail' chamada_hoje.id %}" class="btn btn-light">Ver chamada</a>
+              {% else %}
+                <p>Nenhuma chamada hoje.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mb-3">
+            <div class="card-header">Usuários por Setor</div>
+            <div class="card-body">
+              <ul class="list-group">
+                {% for item in local %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  {{ item.local }}
+                  <span class="badge bg-primary rounded-pill">{{ item.total }}</span>
+                </li>
+              {% empty %}
+                <li class="list-group-item">Nenhum setor cadastrado</li>
+              {% endfor %}
+              
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {% endblock %}
+
