@@ -1,49 +1,116 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from . import views
+
+# Encarregado
+from .views.Vencarregado import (
+    usuario_list,
+    usuario_create,
+    usuario_aprovar,
+    local_list,
+    local_create,
+    local_edit,
+    local_delete,
+    chamada_list,
+    chamada_create,
+    chamada_detail,
+    dashboard_encarregado,
+    index,
+    register,
+    dashboard
+)
+
+# Gerente
+from .views.Vgerente import (
+    gerente_chamada_detail,
+)
+
+# Gestor
+from .views.Vgestor import (
+    gestor_usuario_list,
+    gestor_usuario_edit,
+)
+
+# Views gerais (se existirem)
+
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('register/', views.register, name='register'),
-    path('dashboard/', views.dashboard, name='dashboard'),
-
-    # Usuários (encarregado)
-    path('usuarios/', views.usuario_list, name='usuario_list'),
-    path('usuarios/novo/', views.usuario_create, name='usuario_create'),
-    path('usuarios/aprovar/<int:pk>/', views.usuario_aprovar, name='usuario_aprovar'),
-    path('', views.redirect_dashboard, name='redirect_dashboard'),
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/', dashboard, name='dashboard'),
 
 
-    # Locais (encarregado)
-    path('locais/', views.local_list, name='local_list'),
-    path('locais/novo/', views.local_create, name='local_create'),
-    path('locais/<int:pk>/editar/', views.local_edit, name='local_edit'),
-    path('locais/<int:pk>/deletar/', views.local_delete, name='local_delete'),
+    # ======================
+    # AUTENTICAÇÃO
+    # ======================
+    path('', index, name='index'),
 
-    # Chamadas (encarregado)
-    path('chamadas/', views.chamada_list, name='chamada_list'),
-    path('chamadas/nova/', views.chamada_create, name='chamada_create'),
-    path('chamadas/<int:pk>/', views.chamada_detail, name='chamada_detail'),
+    path(
+        'login/',
+        auth_views.LoginView.as_view(template_name='registration/login.html'),
+        name='login'
+    ),
+    path(
+        'logout/',
+        auth_views.LogoutView.as_view(),
+        name='logout'
+    ),
+    path('register/', register, name='register'),
 
-    # Gerente
-    path('gerente/chamada/<int:pk>/', views.gerente_chamada_detail, name='gerente_chamada_detail'),
+    # ======================
+    # ENCARREGADO
+    # ======================
+    path(
+        'encarregado/dashboard/',
+        dashboard_encarregado,
+        name='dashboard-encarregado'
+    ),
 
-    # Relatórios (gerente e gestor)
-    path('relatorios/', views.relatorio, name='relatorio'),
+    # Usuários
+    path('encarregado/usuarios/', usuario_list, name='usuario_list'),
+    path('encarregado/usuarios/novo/', usuario_create, name='usuario_create'),
+    path(
+        'encarregado/usuarios/<int:pk>/aprovar/',
+        usuario_aprovar,
+        name='usuario_aprovar'
+    ),
 
-    # Gestor
-    path('gestor/usuarios/', views.gestor_usuario_list, name='gestor_usuario_list'),
-    path('gestor/usuarios/<int:pk>/editar/', views.gestor_usuario_edit, name='gestor_usuario_edit'),
+    # Locais
+    path('encarregado/locais/', local_list, name='local_list'),
+    path('encarregado/locais/novo/', local_create, name='local_create'),
+    path(
+        'encarregado/locais/<int:pk>/editar/',
+        local_edit,
+        name='local_edit'
+    ),
+    path(
+        'encarregado/locais/<int:pk>/deletar/',
+        local_delete,
+        name='local_delete'
+    ),
+
+    # Chamadas
+    path('encarregado/chamadas/', chamada_list, name='chamada_list'),
+    path('encarregado/chamadas/nova/', chamada_create, name='chamada_create'),
+    path(
+        'encarregado/chamadas/<int:pk>/',
+        chamada_detail,
+        name='chamada_detail'
+    ),
+
+    # ======================
+    # GERENTE
+    # ======================
+    path(
+        'gerente/chamadas/<int:pk>/',
+        gerente_chamada_detail,
+        name='gerente_chamada_detail'
+    ),
+
+    # ======================
+    # GESTOR
+    # ======================
+    path('gestor/usuarios/', gestor_usuario_list, name='gestor_usuario_list'),
+    path(
+        'gestor/usuarios/<int:pk>/editar/',
+        gestor_usuario_edit,
+        name='gestor_usuario_edit'
+    ),
 ]
-
-
-
-
-
-
-
-
-

@@ -8,6 +8,7 @@ class User(AbstractUser):
         ('gerente', 'Gerente'),
         ('encarregado', 'Encarregado'),
         ('usuario', 'Usuário'),
+        ('administrador', 'Administrador'),
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='usuario')
     cpf = models.CharField(max_length=14, unique=True, null=True, blank=True)
