@@ -1,6 +1,13 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
+from .views.Vgerente import (
+    exportar_quinzena_excel,
+    exportar_relatorio_excel,
+    gerente_chamada_detail,
+    relatorio
+)
+
 # Encarregado
 from .views.Vencarregado import (
     usuario_list,
@@ -35,7 +42,6 @@ from .views.Vgestor import (
 
 urlpatterns = [
     path('dashboard/', dashboard, name='dashboard'),
-
 
     # ======================
     # AUTENTICAÇÃO
@@ -113,4 +119,14 @@ urlpatterns = [
         gestor_usuario_edit,
         name='gestor_usuario_edit'
     ),
+    # ======================
+# RELATÓRIOS
+# ======================
+    path('relatorios/', relatorio, name='relatorio'),
+    path('exportar-quinzena/', exportar_quinzena_excel, name='exportar_quinzena_excel'),
+
+    # ... outras URLs
+    path('relatorio/', relatorio, name='relatorio'),
+    path('exportar-relatorio-excel/', exportar_relatorio_excel, name='exportar_relatorio_excel'),
 ]
+

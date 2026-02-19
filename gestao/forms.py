@@ -5,7 +5,7 @@ from .models import User, Local, Chamada, Presenca
 class UsuarioRegistroForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'cpf', 'telefone', 'endereco', 'password1', 'password2']
+        fields = ['username', 'first_name', 'cpf', 'telefone', 'endereco', 'password1', 'password2', 'pix']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -33,7 +33,7 @@ class UsuarioRegistroForm(UserCreationForm):
 class UsuarioForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'cpf', 'telefone', 'endereco', 'role', 'aprovado']
+        fields = ['username', 'first_name', 'cpf', 'telefone', 'endereco', 'role', 'aprovado', 'pix']
         # Para encarregado/gestor criar/editar usuários
 
 class LocalForm(forms.ModelForm):

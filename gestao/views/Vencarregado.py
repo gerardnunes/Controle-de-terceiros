@@ -1,4 +1,5 @@
 from datetime import timedelta
+from itertools import count
 from pyexpat.errors import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
@@ -6,6 +7,14 @@ from pytz import timezone
 from streamlit import json
 from django.utils import timezone
 import json
+from django.db.models import Count, Sum, F, DecimalField, ExpressionWrapper
+from datetime import timedelta
+from django.utils import timezone
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Count, F, DecimalField, ExpressionWrapper
+from django.contrib import messages
+
 
 from gestao.decorators import role_required
 from gestao.forms import ChamadaForm, LocalForm, UsuarioForm, UsuarioRegistroForm
@@ -238,14 +247,20 @@ def dashboard_encarregado(request):
     # Previsão para amanhã (média dos últimos 7 dias no mesmo dia da semana)
     amanha = hoje + timedelta(days=1)
     dia_semana_amanha = amanha.weekday()  # 0=segunda, 6=domingo
-    presencas_media = []
-    for i in range(1, 8):
-        dia = amanha - timedelta(days=i*7)  # mesmo dia da semana, semanas anteriores
-        chamada = Chamada.objects.filter(data=dia).first()
-        if chamada:
-            presencas_media.append(chamada.presencas.count())
-    previsao = int(sum(presencas_media) / len(presencas_media)) if presencas_media else 0
-    
+    inicio_7_dias = hoje - timedelta(days=7)
+
+    chamadas_7_dias = (
+        Chamada.objects
+        .filter(data__gte=inicio_7_dias, status='aprovado')
+        .prefetch_related('presencas')
+    )
+
+    total_presencas = sum(
+        ch.presencas.count() for ch in chamadas_7_dias
+    )
+
+    previsao = round(total_presencas / 7) if total_presencas else 0
+
     # Timeline de atividades (últimas 5 chamadas criadas)
     atividades = []
     for chamada in Chamada.objects.order_by('-criado_em')[:5]:
@@ -273,7 +288,7 @@ def dashboard_encarregado(request):
         'atividades': atividades,
     }
     return render(request, 'encarregado/dashboard.html', context)
-
+VALOR_POR_CHAMADA = 120
 
 @login_required
 def dashboard(request):
@@ -282,8 +297,65 @@ def dashboard(request):
         return dashboard_encarregado(request)
 
     elif role == 'gerente':
+        hoje = timezone.now().date()
+        inicio_mes = hoje.replace(day=1)
+        inicio_quinzena = hoje - timedelta(days=15)
+
+        # 🔹 Faturamento do mês agrupado por LOCAL + ENCARREGADO
+        chamadas_mes = (
+            Chamada.objects
+            .filter(data__gte=inicio_mes, status='aprovado')
+            .values(
+                'presencas__local__nome',
+                'encarregado__first_name',
+                'encarregado__last_name'
+            )
+            .annotate(
+                total_chamadas=Count('presencas'),
+                total_valor=ExpressionWrapper(
+                    Count('presencas') * VALOR_POR_CHAMADA,
+                    output_field=DecimalField(max_digits=10, decimal_places=2)
+                )
+            )
+            .order_by('presencas__local__nome', 'encarregado__first_name')
+        )
+
+        total_geral_mes = (
+            Chamada.objects
+            .filter(data__gte=inicio_mes, status='aprovado')
+            .annotate(total=Count('presencas') * VALOR_POR_CHAMADA)
+            .aggregate(total=Sum('total'))['total'] or 0
+        )
+
+        # 🔹 Últimos 15 dias
+        chamadas_quinzena = (
+            Chamada.objects
+            .filter(data__gte=inicio_quinzena, status='aprovado')
+            .prefetch_related('presencas__local')
+            .select_related('encarregado')
+            .order_by('-data')
+        )
+
+        total_quinzena = (
+            sum(ch.presencas.count() * VALOR_POR_CHAMADA for ch in chamadas_quinzena)
+            if chamadas_quinzena else 0
+        )
+
+        # 🔹 Pendentes
         chamadas_pendentes = Chamada.objects.filter(status='pendente')
-        return render(request, 'gerente/dashboard.html', {'chamadas': chamadas_pendentes})
+
+        context = {
+            'chamadas': chamadas_pendentes,
+            'chamadas_mes': chamadas_mes,
+            'total_geral_mes': total_geral_mes,
+            'chamadas_quinzena': chamadas_quinzena,
+            'total_quinzena': total_quinzena,
+            
+        }
+
+
+        return render(request, 'gerente/dashboard.html', context)
+
     elif role == 'gestor':
         return render(request, 'gestor/dashboard.html')
     else:  # usuario

@@ -1,25 +1,149 @@
 {% extends "base.html" %}
+{% load static %}
+{% block title %}Dashboard Gerente{% endblock %}
+
 {% block content %}
-<h2>Dashboard do Gerente</h2>
-<h3>Chamadas Pendentes</h3>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Encarregado</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for chamada in chamadas %}
-        <tr>
-            <td>{{ chamada.data|date:"d/m/Y" }}</td>
-            <td>{{ chamada.encarregado.first_name }}</td>
-            <td><a href="{% url 'gerente_chamada_detail' chamada.id %}" class="btn btn-sm btn-primary">Analisar</a></td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="3">Nenhuma chamada pendente.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container mt-4">
+    <h1 class="mb-4">Dashboard Gerente</h1>
+
+    <!-- 🔹 Resumo geral -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Geral do Mês</h5>
+                    <p class="card-text">R$ {{ total_geral_mes|default:"0.00" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Total Últimos 15 dias</h5>
+                    <p class="card-text">R$ {{ total_quinzena|default:"0.00" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Chamadas Pendentes</h5>
+                    <p class="card-text">{{ chamadas.count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔹 Chamadas do mês por Local e Encarregado -->
+    <div class="card mb-4">
+        <div class="card-header">
+            Chamadas Aprovadas do Mês
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Local</th>
+                        <th>Encarregado</th>
+                        <th>Total Valor</th>
+                        <th>Total Chamadas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in chamadas_mes %}
+                    <tr>
+                        <td>{{ c.presencas__local__nome }}</td>
+                        <td>{{ c.encarregado__first_name }} {{ c.encarregado__last_name }}</td>
+                        <td>R$ {{ c.total_valor|default:"0.00" }}</td>
+                        <td>{{ c.total_chamadas|default:"0" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">Nenhuma chamada registrada neste mês</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 🔹 Últimos 15 dias -->
+    <div class="card mb-4">
+        <div class="card-header">
+            Chamadas Últimos 15 dias
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Local</th>
+                        <th>Encarregado</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in chamadas_quinzena %}
+                    <tr>
+                        <td>{{ c.data }}</td>
+                        <td>{{ c.presencas.first.local.nome }}</td>
+                        <td>{{ c.encarregado.first_name }} {{ c.encarregado.last_name }}</td>
+                        <td>{{ c.get_status_display }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhuma chamada nos últimos 15 dias</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 🔹 Chamadas Pendentes -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            Chamadas Pendentes
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Encarregado</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in chamadas %}
+                    <tr>
+                        <td>{{ c.data }}</td>
+                        <td>{{ c.encarregado.first_name }} {{ c.encarregado.last_name }}</td>
+                        <td>{{ c.get_status_display }}</td>
+                        <td>
+                            <form method="post" action="{% url 'gerente_chamada_detail' c.id %}" style="display:inline;">
+    {% csrf_token %}
+    <input type="hidden" name="acao" value="aprovar">
+    <button type="submit" class="btn btn-success btn-sm">Aprovar</button>
+</form>
+
+<form method="post" action="{% url 'gerente_chamada_detail' c.id %}" style="display:inline;">
+    {% csrf_token %}
+    <input type="hidden" name="acao" value="rejeitar">
+    <button type="submit" class="btn btn-danger btn-sm">Rejeitar</button>
+</form>
+
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">Nenhuma chamada pendente</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

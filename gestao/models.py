@@ -17,6 +17,7 @@ class User(AbstractUser):
     aprovado = models.BooleanField(default=False)  # apenas para usuários
     aprovado_por = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='aprovados')
     aprovado_em = models.DateTimeField(null=True, blank=True)
+    pix = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
