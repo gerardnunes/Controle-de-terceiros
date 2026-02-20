@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <h1 class="mb-4">Dashboard Gerente</h1>
 
-    <!-- 🔹 Resumo geral -->
+    <!-- 🔹 RESUMO GERAL (cards) -->
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card text-white bg-primary">
@@ -34,10 +34,10 @@
         </div>
     </div>
 
-    <!-- 🔹 Chamadas do mês por Local e Encarregado -->
+    <!-- 🔹 CHAMADAS DO MÊS (aprovadas) – agrupadas por local/encarregado -->
     <div class="card mb-4">
         <div class="card-header">
-            Chamadas Aprovadas do Mês
+            <strong>Chamadas Aprovadas do Mês</strong>
         </div>
         <div class="card-body">
             <table class="table table-bordered table-striped">
@@ -67,10 +67,10 @@
         </div>
     </div>
 
-    <!-- 🔹 Últimos 15 dias -->
+    <!-- 🔹 ÚLTIMOS 15 DIAS (todas as chamadas do período) -->
     <div class="card mb-4">
         <div class="card-header">
-            Chamadas Últimos 15 dias
+            <strong>Chamadas dos Últimos 15 Dias</strong>
         </div>
         <div class="card-body">
             <table class="table table-bordered table-striped">
@@ -85,14 +85,18 @@
                 <tbody>
                     {% for c in chamadas_quinzena %}
                     <tr>
-                        <td>{{ c.data }}</td>
-                        <td>{{ c.presencas.first.local.nome }}</td>
+                        <td>{{ c.data|date:"d/m/Y" }}</td>
+                        <td>
+                            {% with primeira=c.presencas.first %}
+                                {{ primeira.local.nome|default:"—" }}
+                            {% endwith %}
+                        </td>
                         <td>{{ c.encarregado.first_name }} {{ c.encarregado.last_name }}</td>
                         <td>{{ c.get_status_display }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center">Nenhuma chamada nos últimos 15 dias</td>
+                        <td colspan="4" class="text-center">Nenhuma chamada nos últimos 15 dias</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -100,10 +104,10 @@
         </div>
     </div>
 
-    <!-- 🔹 Chamadas Pendentes -->
+    <!-- 🔹 CHAMADAS PENDENTES (com botão de detalhes e ações) -->
     <div class="card mb-4">
         <div class="card-header bg-warning text-dark">
-            Chamadas Pendentes
+            <strong>Chamadas Pendentes</strong>
         </div>
         <div class="card-body">
             <table class="table table-bordered table-striped">
@@ -112,33 +116,41 @@
                         <th>Data</th>
                         <th>Encarregado</th>
                         <th>Status</th>
+                        <th>Detalhes</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for c in chamadas %}
                     <tr>
-                        <td>{{ c.data }}</td>
+                        <td>{{ c.data|date:"d/m/Y" }}</td>
                         <td>{{ c.encarregado.first_name }} {{ c.encarregado.last_name }}</td>
                         <td>{{ c.get_status_display }}</td>
                         <td>
+                            <a href="{% url 'gerente_chamada_detail' c.id %}" class="btn btn-info btn-sm">
+                                <i class="bi bi-eye"></i> Detalhes
+                            </a>
+                        </td>
+                        <td>
                             <form method="post" action="{% url 'gerente_chamada_detail' c.id %}" style="display:inline;">
-    {% csrf_token %}
-    <input type="hidden" name="acao" value="aprovar">
-    <button type="submit" class="btn btn-success btn-sm">Aprovar</button>
-</form>
-
-<form method="post" action="{% url 'gerente_chamada_detail' c.id %}" style="display:inline;">
-    {% csrf_token %}
-    <input type="hidden" name="acao" value="rejeitar">
-    <button type="submit" class="btn btn-danger btn-sm">Rejeitar</button>
-</form>
-
+                                {% csrf_token %}
+                                <input type="hidden" name="acao" value="aprovar">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="bi bi-check-circle"></i> Aprovar
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'gerente_chamada_detail' c.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="acao" value="rejeitar">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-x-circle"></i> Rejeitar
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center">Nenhuma chamada pendente</td>
+                        <td colspan="5" class="text-center">Nenhuma chamada pendente</td>
                     </tr>
                     {% endfor %}
                 </tbody>

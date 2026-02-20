@@ -36,7 +36,7 @@ def exportar_quinzena_excel(request):
     quinze_dias_atras = hoje - timedelta(days=15)
     chamadas = Chamada.objects.filter(
         data__gte=quinze_dias_atras,
-        status='concluida'
+        status='aprovadas'
     ).select_related('encarregado').order_by('-data')
 
     # Criar workbook e planilha

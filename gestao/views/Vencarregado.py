@@ -229,7 +229,7 @@ def dashboard_encarregado(request):
     
     # Chamadas pendentes de aprovação (últimas 5)
     chamadas_pendentes = Chamada.objects.filter(status='pendente').order_by('-data')[:5]
-    
+    chamadas_hoje = Chamada.objects.filter(data=hoje).first()
     # Mapa de calor (presenças por dia da semana)
     dias_semana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
     calor_data = []
@@ -271,6 +271,7 @@ def dashboard_encarregado(request):
         })
     
     context = {
+        'chamadas_hoje': chamadas_hoje,
         'usuarios_totais': usuarios_totais,
         'usuarios_ativos': usuarios_ativos,
         'usuarios_pendentes': usuarios_pendentes,
@@ -290,6 +291,18 @@ def dashboard_encarregado(request):
     return render(request, 'encarregado/dashboard.html', context)
 VALOR_POR_CHAMADA = 120
 
+def voltar_dias_uteis(data, dias_uteis):
+    dias_contados = 0
+    
+    while dias_contados < dias_uteis:
+        data -= timedelta(days=1)
+        
+        # weekday(): 0=segunda ... 6=domingo
+        if data.weekday() < 5:  # 0-4 são dias úteis
+            dias_contados += 1
+            
+    return data
+    
 @login_required
 def dashboard(request):
     role = request.user.role
@@ -299,7 +312,7 @@ def dashboard(request):
     elif role == 'gerente':
         hoje = timezone.now().date()
         inicio_mes = hoje.replace(day=1)
-        inicio_quinzena = hoje - timedelta(days=15)
+        inicio_quinzena = voltar_dias_uteis(hoje, 1)
 
         # 🔹 Faturamento do mês agrupado por LOCAL + ENCARREGADO
         chamadas_mes = (
