@@ -1,8 +1,7 @@
  #--- Gestor: Gerenciar todos os usuários ---
 from pyexpat.errors import messages
 from django.shortcuts import get_object_or_404, get_object_or_404, redirect, render
-from flask_login import login_required
-
+from django.contrib.auth.decorators import login_required
 from gestao.decorators import role_required
 from gestao.forms import UsuarioForm
 from gestao.models import User
@@ -27,3 +26,12 @@ def gestor_usuario_edit(request, pk):
     else:
         form = UsuarioForm(instance=user)
     return render(request, 'gestor/usuario_form.html', {'form': form})
+
+@login_required
+@role_required('gestor')
+def gestor_usuario_list(request):
+    usuarios_total = User.objects.filter(role='usuario').count()
+    usuarios = User.objects.all().order_by('role', 'username')
+    total_usuarios = User.objects.count()
+
+    return render(request, 'gestor/dashboard.html', {'usuarios': usuarios, 'usuarios_total': usuarios_total, 'total_usuarios': total_usuarios})

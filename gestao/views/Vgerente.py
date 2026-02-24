@@ -144,6 +144,7 @@ def relatorio(request):
         'presencas__usuario__id',
         'presencas__usuario__first_name',
         'presencas__usuario__last_name',
+        'presencas__local__nome',
     ).annotate(
         total_chamadas=Count('presencas'),
         total_valor=ExpressionWrapper(
@@ -152,6 +153,8 @@ def relatorio(request):
         )
     ).order_by('-total_valor')
 
+    for item in dados_agrupados:
+        print(item)
 
     # Preparar lista para o template, calculando dias trabalhados e média
     dados_template = []
@@ -176,6 +179,7 @@ def relatorio(request):
             'total_chamadas': item['total_chamadas'],
             'valor': valor,
             'media_diaria': media,
+            'local' : item['presencas__local__nome']
         })
 
         total_dias += dias_trabalhados
@@ -231,6 +235,7 @@ def exportar_relatorio_excel(request):
         'presencas__usuario__id',
         'presencas__usuario__first_name',
         'presencas__usuario__last_name',
+        'presencas__local__nome',
     ).annotate(
         total_chamadas=Count('presencas'),
         total_valor=ExpressionWrapper(
@@ -252,8 +257,10 @@ def exportar_relatorio_excel(request):
         'Dias Trabalhados',
         'Total Chamadas',
         'Valor Total (R$)',
-        'Média Diária (R$)'
-    ])
+        'Média Diária (R$)',
+        "Local",
+        "data",
+            ])
 
     total_dias = 0
     total_chamadas = 0
@@ -262,7 +269,7 @@ def exportar_relatorio_excel(request):
     for item in dados_agrupados:
 
         usuario_id = item['presencas__usuario__id']
-
+        local = item['presencas__local__nome']
         dias_trabalhados = chamadas.filter(
             presencas__usuario__id=usuario_id
         ).values('data').distinct().count()
@@ -276,7 +283,8 @@ def exportar_relatorio_excel(request):
             dias_trabalhados,
             item['total_chamadas'],
             float(valor),
-            round(media, 2)
+            round(media, 2),
+            local,
         ])
 
         total_dias += dias_trabalhados
@@ -290,6 +298,12 @@ def exportar_relatorio_excel(request):
         float(total_valor),
         round(total_valor / total_dias, 2) if total_dias else 0
     ])
+    
+    for chamada in chamadas.order_by('data'):
+        for presenca in chamada.presencas.all():
+            ws_resumo.append([
+                chamada.data.strftime("%d/%m/%Y"),
+            ])
 
     for col in ws_resumo.columns:
         max_len = max(len(str(cell.value)) for cell in col) + 2

@@ -119,6 +119,7 @@ urlpatterns = [
         gestor_usuario_edit,
         name='gestor_usuario_edit'
     ),
+    path('gestor/usuarios/', gestor_usuario_list, name='usuarios_total'),
     # ======================
 # RELATÓRIOS
 # ======================

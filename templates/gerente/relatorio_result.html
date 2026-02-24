@@ -17,6 +17,7 @@
             <th>Total Chamadas</th>
             <th>Valor Total (R$)</th>
             <th>Média Diária (R$)</th>
+            <th>Local</th>
         </tr>
     </thead>
     <tbody>
@@ -27,6 +28,7 @@
             <td>{{ item.total_chamadas }}</td>
             <td>{{ item.valor|floatformat:2 }}</td>
             <td>{{ item.media_diaria|floatformat:2 }}</td>
+            <td>{{ item.local }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="5">Nenhum dado encontrado no período.</td></tr>

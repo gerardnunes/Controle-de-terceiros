@@ -293,9 +293,9 @@ VALOR_POR_CHAMADA = 120
 
 def voltar_dias_uteis(data, dias_uteis):
     dias_contados = 0
-    
+    #lembrar dessa função, é importante.
     while dias_contados < dias_uteis:
-        data -= timedelta(days=1)
+        data -= timedelta(days=15)
         
         # weekday(): 0=segunda ... 6=domingo
         if data.weekday() < 5:  # 0-4 são dias úteis
@@ -312,7 +312,7 @@ def dashboard(request):
     elif role == 'gerente':
         hoje = timezone.now().date()
         inicio_mes = hoje.replace(day=1)
-        inicio_quinzena = voltar_dias_uteis(hoje, 1)
+        inicio_quinzena = hoje - timedelta(days=15)
 
         # 🔹 Faturamento do mês agrupado por LOCAL + ENCARREGADO
         chamadas_mes = (
@@ -370,6 +370,50 @@ def dashboard(request):
         return render(request, 'gerente/dashboard.html', context)
 
     elif role == 'gestor':
-        return render(request, 'gestor/dashboard.html')
+        hoje = timezone.now().date()
+        inicio_mes = hoje.replace(day=1)
+        chamadas_mes = (
+            Chamada.objects
+            .filter(data__gte=inicio_mes, status='aprovado')
+            .values(
+                'presencas__local__nome',
+                'encarregado__first_name',
+                'encarregado__last_name'
+            )
+            .annotate(
+                total_chamadas=Count('presencas'),
+                total_valor=ExpressionWrapper(
+                    Count('presencas') * VALOR_POR_CHAMADA,
+                    output_field=DecimalField(max_digits=10, decimal_places=2)
+                )
+            )
+            .order_by('presencas__local__nome', 'encarregado__first_name')
+        )
+        usuarios_total = User.objects.filter(role='usuario').count()
+        ativo_hoje = User.objects.filter(role='usuario', aprovado=True, presencas__chamada__data=hoje).distinct().count()
+        setores = []
+        hoje = timezone.now().date()
+        data_limite_30 = hoje - timedelta(days=30)
+        data_limite_7 = chamada__data=hoje
+        for local in Local.objects.all():
+            count = Presenca.objects.filter(
+                local=local,
+                chamada__data=hoje,
+            ).values('usuario').distinct().count()
+            if count > 0:
+                setores.append({'nome': local.nome, 'total': count})
+
+        for setor in setores:
+            print(setor)
+
+        context = {
+            'chamadas_mes': chamadas_mes,
+            'total_usuarios': usuarios_total,
+            'ativos_hoje': ativo_hoje,
+            'setores': setores,
+        }
+
+        return render(request, 'gestor/dashboard.html', context)
     else:  # usuario
         return render(request, 'usuario/perfil.html')
+    

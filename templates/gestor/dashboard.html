@@ -1,91 +1,215 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Dashboard do Gestor</h2>
-<div class="row">
-    <div class="col-md-4">
+
+<h2>Dashboard do Gestor Nacional</h2>
+
+<!-- Abas de navegação -->
+<ul class="nav nav-tabs" id="gestorTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Visão Geral</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="relatorios-tab" data-bs-toggle="tab" data-bs-target="#relatorios" type="button" role="tab" aria-controls="relatorios" aria-selected="false">Relatórios</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="chamadas-tab" data-bs-toggle="tab" data-bs-target="#chamadas" type="button" role="tab" aria-controls="chamadas" aria-selected="false">Chamadas</button>
+  </li>
+</ul>
+<!-- Conteúdo das abas -->
+<div class="tab-content" id="gestorTabContent">
+
+  <!-- Aba Visão Geral (existente, expandida) -->
+  <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+    <div class="row mt-3">
+      <div class="col-md-4">
         <div class="card text-white bg-info mb-3">
-            <div class="card-header">Usuários</div>
-            <div class="card-body">
-                <h5 class="card-title">{{ total_usuarios }}</h5>
-                <a href="{% url 'gestor_usuario_list' %}" class="btn btn-light">Gerenciar</a>
-            </div>
+          <div class="card-header">Usuários</div>
+          <div class="card-body">
+            <h5 class="card-title">{{ total_usuarios }}</h5>
+          </div>
         </div>
-    </div>
-    <div class="col-md-4">
+      </div>
+      <div class="col-md-4">
         <div class="card text-white bg-success mb-3">
-            <div class="card-header">Relatórios</div>
-            <div class="card-body">
-                <a href="{% url 'relatorio' %}" class="btn btn-light">Acessar</a>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="tab-content" id="myTabContent">
-    <!-- Aba Visão Geral -->
-    <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-      <div class="row mt-3">
-        <div class="col-md-4">
-          <div class="card text-white bg-primary mb-3">
-            <div class="card-header">Usuários Pendentes</div>
-            <div class="card-body">
-              <h5 class="card-title">{{ pendentes }}</h5>
-              <a href="{% url 'usuario_list' %}" class="btn btn-light">Ver pendentes</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-white bg-success mb-3">
-            <div class="card-header">Ativos Trabalhando Hoje</div>
-            <div class="card-body">
-              <h5 class="card-title">{{ ativos_hoje }}</h5>
-              {% if chamada_hoje %}
-                <a href="{% url 'chamada_detail' chamada_hoje.id %}" class="btn btn-light">Ver chamada</a>
-              {% else %}
-                <p>Nenhuma chamada hoje.</p>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card mb-3">
-            <div class="card-header">Usuários por Setor</div>
-            <div class="card-body">
-              <ul class="list-group">
-                {% for item in local %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  {{ item.local }}
-                  <span class="badge bg-primary rounded-pill">{{ item.total }}</span>
-                </li>
-              {% empty %}
-                <li class="list-group-item">Nenhum setor cadastrado</li>
-              {% endfor %}
-              
-              </ul>
-            </div>
+          <div class="card-header">Relatórios</div>
+          <div class="card-body">
+            <a href="{% url 'relatorio' %}" class="btn btn-light">Acessar</a>
           </div>
         </div>
       </div>
     </div>
-  
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+          <div class="card-header">Usuários Pendentes</div>
+          <div class="card-body">
+            <h5 class="card-title">{{ pendentes }}</h5>
+            <a href="{% url 'usuario_list' %}?status=pending" class="btn btn-light">Gerenciar</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-header">Usuários Ativos</div>
+          <div class="card-body">
+            <h5 class="card-title">{{ ativos_hoje }}</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card mb-3">
+          <div class="card-header">Usuários por Setor</div>
+          <div class="card-body">
+            <ul class="list-group">
+              {% for item in setores %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ item.nome }}
+                <span class="badge bg-primary rounded-pill">{{ item.total }}</span>
+              </li>
+              {% empty %}
+              <li class="list-group-item">Nenhum setor cadastrado</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Aba Relatórios (nova) -->
+  <div class="tab-pane fade" id="relatorios" role="tabpanel" aria-labelledby="relatorios-tab">
+    <div class="row mt-3">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">Relatórios Rápidos</div>
+          <div class="card-body">
+            <div class="list-group">
+              <a href="" class="list-group-item list-group-item-action">Usuários por setor (PDF)</a>
+              <a href="" class="list-group-item list-group-item-action">Chamadas por período (Excel)</a>
+              <a href="" class="list-group-item list-group-item-action">Frequência dos usuários</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">Gerar Relatório Completo</div>
+          <div class="card-body">
+            <form method="get" action="">
+              <div class="mb-3">
+                <label for="data_inicio" class="form-label">Data início</label>
+                <input type="date" class="form-control" id="data_inicio" name="data_inicio">
+              </div>
+              <div class="mb-3">
+                <label for="data_fim" class="form-label">Data fim</label>
+                <input type="date" class="form-control" id="data_fim" name="data_fim">
+              </div>
+              <div class="mb-3">
+              </div>
+              <button type="submit" class="btn btn-primary">Gerar relatório</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Aba Chamadas (nova) -->
+  <div class="tab-pane fade" id="chamadas" role="tabpanel" aria-labelledby="chamadas-tab">
+    <div class="row mt-3">
+      <div class="col-md-12">
+        <div class="d-flex justify-content-between">
+          <h4>Registro de Chamadas</h4>
+          <a href="{% url 'chamada_create' %}" class="btn btn-success">+ Nova Chamada</a>
+        </div>
+        <table class="table table-hover mt-3">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Setor</th>
+              <th>Presentes</th>
+              <th>Ausentes</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for chamada in chamadas_recentes %}
+            <tr>
+              <td>{{ chamada.data|date:"d/m/Y" }}</td>
+              <td>{{ chamada.setor.nome }}</td>
+              <td>{{ chamada.presentes }}</td>
+              <td>{{ chamada.ausentes }}</td>
+              <td>
+                <a href="{% url 'chamada_detail' chamada.id %}" class="btn btn-sm btn-outline-info">Detalhes</a>
+                <a href="{% url 'chamada_edit' chamada.id %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5">Nenhuma chamada registrada.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
+  <!-- Aba Configurações (nova) -->
+  <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="config-tab">
+    <div class="row mt-3">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">Setores</div>
+          <div class="card-body">
+            <a href="" class="btn btn-primary mb-3">+ Adicionar Setor</a>
+            <ul class="list-group">
+              {% for setor in setores %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ setor.nome }}
+              </li>
+              {% empty %}
+              <li class="list-group-item">Nenhum setor cadastrado.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">Regiões</div>
+          <div class="card-body">
+            <a href="" class="btn btn-primary mb-3">+ Adicionar Região</a>
+            <ul class="list-group">
+              {% for regiao in regioes %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ regiao.nome }}
+                <span>
+                  <a href="{% url 'regiao_edit' regiao.id %}" class="btn btn-sm btn-outline-warning">Editar</a>
+                  <a href="{% url 'regiao_delete' regiao.id %}" class="btn btn-sm btn-outline-danger">Excluir</a>
+                </span>
+              </li>
+              {% empty %}
+              <li class="list-group-item">Nenhuma região cadastrada.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<!-- Scripts de exemplo para funções dos botões (podem ser implementadas no backend) -->
+<script>
+  function notificarPendentes() {
+    // Aqui você pode chamar uma view que envia notificações para usuários pendentes
+    alert('Notificações enviadas para usuários pendentes!');
+  }
+  function exportarUsuarios() {
+    // Redirecionar para uma view que gera um arquivo CSV/Excel
+    window.location.href = "";
+  }
+</script>
 
 {% endblock %}
-
