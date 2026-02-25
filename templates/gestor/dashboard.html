@@ -37,6 +37,20 @@
           </div>
         </div>
       </div>
+      <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-header">Setores ativos</div>
+          <ul class="list-group">
+              {% for item in setores_ativ %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ item.nome }}
+              </li>
+              {% empty %}
+              <li class="list-group-item">Nenhum setor ativo.</li>
+              {% endfor %}
+            </ul>
+        </div>
+      </div>
     </div>
     <div class="row">
       <div class="col-md-4">
@@ -58,7 +72,7 @@
       </div>
       <div class="col-md-4">
         <div class="card mb-3">
-          <div class="card-header">Usuários por Setor</div>
+          <div class="card-header">Usuários por Seetor</div>
           <div class="card-body">
             <ul class="list-group">
               {% for item in setores %}
@@ -67,7 +81,7 @@
                 <span class="badge bg-primary rounded-pill">{{ item.total }}</span>
               </li>
               {% empty %}
-              <li class="list-group-item">Nenhum setor cadastrado</li>
+              <li class="list-group-item">Nenhuma Chamada hoje</li>
               {% endfor %}
             </ul>
           </div>
@@ -84,9 +98,16 @@
           <div class="card-header">Relatórios Rápidos</div>
           <div class="card-body">
             <div class="list-group">
-              <a href="" class="list-group-item list-group-item-action">Usuários por setor (PDF)</a>
-              <a href="" class="list-group-item list-group-item-action">Chamadas por período (Excel)</a>
-              <a href="" class="list-group-item list-group-item-action">Frequência dos usuários</a>
+              <a href="#"
+   id="relatorio-setor"
+   class="list-group-item list-group-item-action">
+   Usuários por setor (Excel)
+</a>
+              <a href="#"
+   id="chamada-periodo"
+   class="list-group-item list-group-item-action">
+   Chamadas por período (Excel)
+</a>
             </div>
           </div>
         </div>
@@ -95,19 +116,15 @@
         <div class="card">
           <div class="card-header">Gerar Relatório Completo</div>
           <div class="card-body">
-            <form method="get" action="">
-              <div class="mb-3">
-                <label for="data_inicio" class="form-label">Data início</label>
-                <input type="date" class="form-control" id="data_inicio" name="data_inicio">
-              </div>
-              <div class="mb-3">
-                <label for="data_fim" class="form-label">Data fim</label>
-                <input type="date" class="form-control" id="data_fim" name="data_fim">
-              </div>
-              <div class="mb-3">
-              </div>
-              <button type="submit" class="btn btn-primary">Gerar relatório</button>
-            </form>
+  <div class="mb-3">
+  <label class="form-label">Data início</label>
+  <input type="date" class="form-control" id="inicio">
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Data fim</label>
+  <input type="date" class="form-control" id="fim">
+</div>
           </div>
         </div>
       </div>
@@ -210,6 +227,50 @@
     // Redirecionar para uma view que gera um arquivo CSV/Excel
     window.location.href = "";
   }
+
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    document.getElementById("relatorio-setor")
+        .addEventListener("click", function(e) {
+
+        e.preventDefault();
+
+        const inicio = document.getElementById('inicio').value;
+        const fim = document.getElementById('fim').value;
+
+        if (!inicio || !fim) {
+            alert("Selecione data início e fim.");
+            return;
+        }
+
+        window.location.href =
+            "{% url 'usuario_p_setor' %}?inicio=" + inicio + "&fim=" + fim;
+    });
+
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    document.getElementById("chamada-periodo")
+        .addEventListener("click", function(e) {
+
+        e.preventDefault();
+
+        const inicio = document.getElementById('inicio').value;
+        const fim = document.getElementById('fim').value;
+
+        if (!inicio || !fim) {
+            alert("Selecione data início e fim.");
+            return;
+        }
+
+        window.location.href =
+            "{% url 'chamada_periodo' %}?inicio=" + inicio + "&fim=" + fim;
+    });
+
+});
+
 </script>
 
 {% endblock %}

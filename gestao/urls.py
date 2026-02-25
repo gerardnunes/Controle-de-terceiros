@@ -35,12 +35,18 @@ from .views.Vgerente import (
 from .views.Vgestor import (
     gestor_usuario_list,
     gestor_usuario_edit,
+    usuario_p_setor,
+    chamada_periodo,
 )
 
 # Views gerais (se existirem)
 
 
 urlpatterns = [
+    #export do gestor.
+    path('usuario-p-setor/', usuario_p_setor, name='usuario_p_setor'),
+    path('chamada-periodo/', chamada_periodo, name='chamada_periodo'),
+    
     path('dashboard/', dashboard, name='dashboard'),
 
     # ======================

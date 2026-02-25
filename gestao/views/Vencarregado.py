@@ -395,6 +395,7 @@ def dashboard(request):
         hoje = timezone.now().date()
         data_limite_30 = hoje - timedelta(days=30)
         data_limite_7 = chamada__data=hoje
+        
         for local in Local.objects.all():
             count = Presenca.objects.filter(
                 local=local,
@@ -402,7 +403,7 @@ def dashboard(request):
             ).values('usuario').distinct().count()
             if count > 0:
                 setores.append({'nome': local.nome, 'total': count})
-
+        set_atv = Local.objects.all()
         for setor in setores:
             print(setor)
 
@@ -411,6 +412,7 @@ def dashboard(request):
             'total_usuarios': usuarios_total,
             'ativos_hoje': ativo_hoje,
             'setores': setores,
+            'setores_ativ': set_atv,
         }
 
         return render(request, 'gestor/dashboard.html', context)
