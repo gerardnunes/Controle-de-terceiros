@@ -376,6 +376,7 @@ def dashboard(request):
             Chamada.objects
             .filter(data__gte=inicio_mes, status='aprovado')
             .values(
+                'data',
                 'presencas__local__nome',
                 'encarregado__first_name',
                 'encarregado__last_name'

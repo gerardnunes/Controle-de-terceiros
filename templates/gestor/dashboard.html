@@ -137,7 +137,6 @@
       <div class="col-md-12">
         <div class="d-flex justify-content-between">
           <h4>Registro de Chamadas</h4>
-          <a href="{% url 'chamada_create' %}" class="btn btn-success">+ Nova Chamada</a>
         </div>
         <table class="table table-hover mt-3">
           <thead>
@@ -150,22 +149,18 @@
             </tr>
           </thead>
           <tbody>
-            {% for chamada in chamadas_recentes %}
-            <tr>
-              <td>{{ chamada.data|date:"d/m/Y" }}</td>
-              <td>{{ chamada.setor.nome }}</td>
-              <td>{{ chamada.presentes }}</td>
-              <td>{{ chamada.ausentes }}</td>
-              <td>
-                <a href="{% url 'chamada_detail' chamada.id %}" class="btn btn-sm btn-outline-info">Detalhes</a>
-                <a href="{% url 'chamada_edit' chamada.id %}" class="btn btn-sm btn-outline-secondary">Editar</a>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="5">Nenhuma chamada registrada.</td>
-            </tr>
-            {% endfor %}
+           {% for chamada in chamadas_mes %}
+<tr>
+  <td>{{ chamada.data|date:"d/m/Y" }}</td>
+  <td>{{ chamada.presencas__local__nome }}</td>
+  <td>{{ chamada.total_chamadas }}</td>
+  <td>--</td>
+  <td>
+    <a href="#" class="btn btn-sm btn-outline-info">Detalhes</a>
+    <a href="#" class="btn btn-sm btn-outline-secondary">Editar</a>
+  </td>
+</tr>
+{% endfor %}
           </tbody>
         </table>
       </div>
