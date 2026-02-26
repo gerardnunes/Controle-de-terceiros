@@ -11,6 +11,9 @@ ALLOWED_HOSTS = [
     "controle-de-terceiros-production.up.railway.app",
     "localhost",
     "127.0.0.1",
+    'controle-de-terceiros.onrender.com',
+    "localhost",
+    "127.0.0.1",
 ]
 INSTALLED_APPS = [
     'gestao',  # nossa app
