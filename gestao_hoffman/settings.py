@@ -92,3 +92,7 @@ AUTH_USER_MODEL = 'gestao.User'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard'
 LOGOUT_REDIRECT_URL = '/'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://controle-de-terceiros-production.up.railway.app",
+]
