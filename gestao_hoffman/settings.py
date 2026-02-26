@@ -7,8 +7,11 @@ SECRET_KEY = 'django-insecure-chave-secreta-aqui'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    "controle-de-terceiros-production.up.railway.app",
+    "localhost",
+    "127.0.0.1",
+]
 INSTALLED_APPS = [
     'gestao',  # nossa app
     'django.contrib.admin',
@@ -59,6 +62,16 @@ DATABASES = {
     )
 }
 
+
+
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    ...
+]
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
