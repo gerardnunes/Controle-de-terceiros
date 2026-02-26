@@ -214,9 +214,10 @@ def chamada_periodo(request):
 
 
 @login_required
-@role_required('gestor')
-def chamada_detailG(request):
-    chamadas = Chamada.objects.filter(gestor=request.user).order_by('-data')
-    return render(request, 'gestor/chamada_list.html', {'chamadas': chamadas})
+@role_required('gestor',)
+def chamada_detailG( request , pk):
+    chamada = Chamada.objects.get(pk=pk)
+    presencas = chamada.presencas.all()
+    return render(request, 'gestor/chamada_detail.html', {'chamada': chamada, 'presencas': presencas})
 
 

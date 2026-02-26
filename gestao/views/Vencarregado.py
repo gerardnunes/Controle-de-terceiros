@@ -421,5 +421,6 @@ def dashboard(request):
 
         return render(request, 'gestor/dashboard.html', context)
     else:  # usuario
+        
         return render(request, 'usuario/perfil.html')
     

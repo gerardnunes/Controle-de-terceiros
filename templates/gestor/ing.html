@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admsty.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área do Cliente - Agenda Fitness</title>
+    <style>
+    </style>
+</head>
+<body>
+
+    <header>
+        {% if erro %}
+        <div style="color: rgb(9, 255, 0);">{{ erro }}</div>
+        {% endif %}
+        <h1>Agenda Fitness</h1>
+        <h1>quem tem objetivo nao tem desculpas. treine com determinaçao.</h1>
+    </header>
+
+    <nav>
+        <a href="#">Início</a>
+        <a href="#horarios">Horários</a>
+        <a href="#contato">Contato</a>
+    </nav>
+    <section class="cards-treino">
+
+        <div class="card card0">
+            <h2>card 1</h2>
+            <p>conteudo</p>
+        </div>
+
+        <div class="card card1">
+            <h2>Card 1</h2>
+            <p>Conteúdo do Card 1</p>
+        </div>
+
+        <div class="card card2">
+            <h2>Card 2</h2>
+            <p>Conteúdo do Card 2</p>
+        </div>
+        <form method="post" action="{{ url_for('app.cad') }}">
+            <button class="ent" type="submit">criar um card</button>
+        </form>
+           
+        </div>
+    </section>
+
+  
+
+</body>
+</html>
