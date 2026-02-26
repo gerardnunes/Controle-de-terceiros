@@ -1,8 +1,6 @@
 # --- Gerente: Aprovação de Chamadas ---
 from datetime import timedelta, timezone
-from itertools import count
 from pyexpat.errors import messages
-from dash import Output
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
