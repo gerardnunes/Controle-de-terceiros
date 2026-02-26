@@ -376,6 +376,7 @@ def dashboard(request):
             Chamada.objects
             .filter(data__gte=inicio_mes, status='aprovado')
             .values(
+                'id',
                 'data',
                 'presencas__local__nome',
                 'encarregado__first_name',
@@ -407,8 +408,10 @@ def dashboard(request):
         set_atv = Local.objects.all()
         for setor in setores:
             print(setor)
-
+       
+        chamada = Chamada.objects.filter(status='aprovado').order_by('-data')[:5]
         context = {
+            'chamada':chamada,
             'chamadas_mes': chamadas_mes,
             'total_usuarios': usuarios_total,
             'ativos_hoje': ativo_hoje,

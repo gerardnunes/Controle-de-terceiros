@@ -150,17 +150,25 @@
           </thead>
           <tbody>
            {% for chamada in chamadas_mes %}
-<tr>
-  <td>{{ chamada.data|date:"d/m/Y" }}</td>
-  <td>{{ chamada.presencas__local__nome }}</td>
-  <td>{{ chamada.total_chamadas }}</td>
-  <td>--</td>
-  <td>
-    <a href="#" class="btn btn-sm btn-outline-info">Detalhes</a>
-    <a href="#" class="btn btn-sm btn-outline-secondary">Editar</a>
+           
+
+        <tr>
+          <td>{{ chamada.data|date:"d/m/Y" }}</td>
+          <td>{{ chamada.presencas__local__nome }}</td>
+          <td>{{ chamada.total_chamadas }}</td>
+          <td>--</td>
+         <td>
+          <td>
+             <a href="{% url 'chamada_detailG' chamada.id %}">Ver detalhes</a>
+
+          <a href="#" class="btn btn-sm btn-outline-secondary">Editar</a>
+        </td>
+      </tr>
+  {% endfor %}
+
   </td>
 </tr>
-{% endfor %}
+
           </tbody>
         </table>
       </div>

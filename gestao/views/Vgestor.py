@@ -210,3 +210,13 @@ def chamada_periodo(request):
     response['Content-Disposition'] = 'attachment; filename=relatorio.xlsx'
 
     return response
+
+
+
+@login_required
+@role_required('gestor')
+def chamada_detailG(request):
+    chamadas = Chamada.objects.filter(gestor=request.user).order_by('-data')
+    return render(request, 'gestor/chamada_list.html', {'chamadas': chamadas})
+
+

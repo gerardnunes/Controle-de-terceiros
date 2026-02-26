@@ -37,13 +37,20 @@ from .views.Vgestor import (
     gestor_usuario_edit,
     usuario_p_setor,
     chamada_periodo,
+    chamada_detailG,
 )
 
 # Views gerais (se existirem)
 
 
 urlpatterns = [
-    #export do gestor.
+    #export do gestor
+    path(
+        'gestor/chamada_detailG/<int:pk>/',
+        chamada_detailG,
+        name='chamada_detailG'
+    ),
+    
     path('usuario-p-setor/', usuario_p_setor, name='usuario_p_setor'),
     path('chamada-periodo/', chamada_periodo, name='chamada_periodo'),
     

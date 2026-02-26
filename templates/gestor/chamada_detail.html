@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Chamada de {{ chamada.data|date:"d/m/Y" }}</h2>
+<p><strong>Status:</strong> {{ chamada.get_status_display }}</p>
+{% if chamada.aprovado_em %}
+    <p><strong>Aprovado por:</strong> {{ chamada.aprovado_por.first_name }} em {{ chamada.aprovado_em|date:"d/m/Y H:i" }}</p>
+{% endif %}
+<h4>Presenças</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Usuário</th>
+            <th>Local</th>
+            <th>Hora Chegada</th>
+            <th>Hora Saída</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in presencas %}
+        <tr>
+            <td>{{ p.usuario.first_name }}</td>
+            <td>{{ p.local.nome }}</td>
+            <td>{{ p.hora_chegada|default:"-" }}</td>
+            <td>{{ p.hora_saida|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Nenhum registro.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'chamada_list' %}" class="btn btn-secondary">Voltar</a>
+{% endblock %}
