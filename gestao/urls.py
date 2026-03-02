@@ -22,7 +22,6 @@ from .views.Vencarregado import (
     chamada_detail,
     dashboard_encarregado,
     index,
-    register,
     dashboard
 )
 
@@ -71,7 +70,7 @@ urlpatterns = [
         auth_views.LogoutView.as_view(),
         name='logout'
     ),
-    path('register/', register, name='register'),
+
 
     # ======================
     # ENCARREGADO

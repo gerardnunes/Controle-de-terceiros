@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h2>Nova Chamada</h2>
-<form method="post">
+
+<form method="post" id="chamadaForm">
     {% csrf_token %}
+
+    <!-- Campo da data (obrigatório no form.py também) -->
     {{ form.as_p }}
+
     <h4>Selecione os usuários presentes</h4>
+
     <table class="table">
         <thead>
             <tr>
@@ -14,25 +20,90 @@
                 <th>Hora Chegada</th>
             </tr>
         </thead>
+
         <tbody>
             {% for usuario in usuarios %}
             <tr>
-                <td><input type="checkbox" name="usuarios" value="{{ usuario.id }}"></td>
-                <td>{{ usuario.first_name }}</td>
                 <td>
-                    <select name="local_{{ usuario.id }}" class="form-control">
+                    <input type="checkbox"
+                           name="usuarios"
+                           value="{{ usuario.id }}"
+                           class="usuario-checkbox">
+                </td>
+
+                <td>
+                    {{ usuario.first_name }}
+                </td>
+
+                <td>
+                    <select name="local_{{ usuario.id }}"
+                            class="form-control local-select">
                         <option value="">Selecione</option>
                         {% for local in locais %}
-                        <option value="{{ local.id }}">{{ local.nome }}</option>
+                        <option value="{{ local.id }}">
+                            {{ local.nome }}
+                        </option>
                         {% endfor %}
                     </select>
                 </td>
-                <td><input type="time" name="hora_{{ usuario.id }}" class="form-control"></td>
+
+                <td>
+                    <input type="time"
+                           name="hora_{{ usuario.id }}"
+                           class="form-control hora-input">
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <button type="submit" class="btn btn-primary">Registrar Chamada</button>
-    <a href="{% url 'chamada_list' %}" class="btn btn-secondary">Cancelar</a>
+
+    <button type="submit" class="btn btn-primary">
+        Registrar Chamada
+    </button>
+
+    <a href="{% url 'chamada_list' %}" class="btn btn-secondary">
+        Cancelar
+    </a>
 </form>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById("chamadaForm");
+
+    form.addEventListener("submit", function (event) {
+
+        let valid = true;
+
+        // 1️⃣ Verifica se pelo menos um usuário foi selecionado
+        const checkedUsers = document.querySelectorAll(".usuario-checkbox:checked");
+
+        if (checkedUsers.length === 0) {
+            valid = false;
+        }
+
+        // 2️⃣ Para cada usuário marcado, validar local e hora
+        checkedUsers.forEach(function (checkbox) {
+
+            const row = checkbox.closest("tr");
+
+            const local = row.querySelector(".local-select");
+            const hora = row.querySelector(".hora-input");
+
+            if (!local.value || !hora.value) {
+                valid = false;
+            }
+
+        });
+
+        if (!valid) {
+            event.preventDefault();
+            alert("Preencha todos os campos obrigatórios (local e hora de chegada).");
+        }
+
+    });
+});
+</script>
+
 {% endblock %}

@@ -129,6 +129,14 @@ def chamada_create(request):
         form = ChamadaForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data['data']
+            if not data:
+                messages.error(request, 'A data é obrigatória.')
+                return render(request, 'encarregado/chamada_form.html', {
+                    'form': form,
+                    'usuarios': usuarios_ids,
+                    'locais': locais
+                })
+             
             # Verificar se já existe chamada para esta data
             if Chamada.objects.filter(data=data, encarregado=request.user).exists():
                 messages.error(request, 'Já existe uma chamada para esta data.')
@@ -140,13 +148,29 @@ def chamada_create(request):
             usuarios_ids = request.POST.getlist('usuarios')
             for uid in usuarios_ids:
                 local_id = request.POST.get(f'local_{uid}')
+                #adicionei validação de local,
+                if not local_id:
+                    messages.error(request, f'Local obrigatório.')
+                    return render(request, 'encarregado/chamada_form.html', {
+                        'form': form,
+                        'usuarios': usuarios_ids,
+                        'locais': local_id,
+                    })
+                #adicionei validação de data
+                if not data:
+                    usuarios_aprovados = User.objects.filter(role='usuario', aprovado=True)
+                    messages.error(request, 'Data é obrigatória.')
+                    return render(request, 'encarregado/chamada_form.html', {
+                        'form': form,
+                        'usuarios': usuarios_aprovados,
+                    })
                 hora = request.POST.get(f'hora_{uid}')
                 if local_id:
                     presenca = Presenca(
                         chamada=chamada,
                         usuario_id=uid,
                         local_id=local_id,
-                        hora_chegada=hora or None
+                        hora_chegada=hora 
                     )
                     presenca.save()
             messages.success(request, 'Chamada registrada.')
@@ -423,3 +447,4 @@ def dashboard(request):
         
         return render(request, 'usuario/perfil.html')
     
+
