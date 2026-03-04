@@ -69,7 +69,7 @@ class Presenca(models.Model):
     hora_saida = models.TimeField(null=True, blank=True)
 
     # Campos de separação (opcional, mas facilita consultas diretas)
-    plataforma = models.CharField(max_length=100, blank=True, null=True)
+    setor = models.CharField(max_length=100, blank=True, null=True)
     filial = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:

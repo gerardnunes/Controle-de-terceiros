@@ -129,7 +129,11 @@ def local_delete(request, pk):
 @login_required
 @role_required('encarregado')
 def chamada_list(request):
-    chamadas = Chamada.objects.filter(encarregado=request.user).order_by('-data')
+    chamadas = Chamada.objects.filter(
+        encarregado=request.user,
+        filial=request.user.filial,
+        setor=request.user.setor
+    ).order_by('-data')
     return render(request, 'encarregado/chamada_list.html', {'chamadas': chamadas})
 
 @login_required

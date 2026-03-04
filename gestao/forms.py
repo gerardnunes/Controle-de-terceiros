@@ -63,8 +63,6 @@ class ChamadaForm(forms.ModelForm):
         model = Chamada
         fields = [
             'data',
-            'setor',
-            'filial'
         ]
         widgets = {
             'data': forms.DateInput(attrs={'type': 'date'}),
