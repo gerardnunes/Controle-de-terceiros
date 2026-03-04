@@ -21,7 +21,7 @@ class User(AbstractUser):
     pix = models.CharField(max_length=50, blank=True)
 
     # Campos de separação (plataforma e filial)
-    plataforma = models.CharField(max_length=100, blank=True, null=True, help_text="Nome ou código da plataforma")
+    setor = models.CharField(max_length=100, blank=True, null=True, help_text="Nome ou código do setor")
     filial = models.CharField(max_length=100, blank=True, null=True, help_text="Nome ou código da filial")
 
     def __str__(self):
@@ -32,7 +32,7 @@ class Local(models.Model):
     descricao = models.TextField(blank=True)
 
     # Campos de separação
-    plataforma = models.CharField(max_length=100, blank=True, null=True)
+    setor = models.CharField(max_length=100, blank=True, null=True)
     filial = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
@@ -52,7 +52,7 @@ class Chamada(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
 
     # Campos de separação
-    plataforma = models.CharField(max_length=100, blank=True, null=True)
+    setor = models.CharField(max_length=100, blank=True, null=True)
     filial = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:

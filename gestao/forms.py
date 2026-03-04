@@ -5,21 +5,23 @@ from .models import User, Local, Chamada, Presenca
 class UsuarioRegistroForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'cpf', 'telefone', 'endereco', 'password1', 'password2', 'pix']
+        fields = [
+            'username',
+            'first_name',
+            'cpf',
+            'telefone',
+            'endereco',
+            'setor',
+            'filial',
+            'pix',
+            'password1',
+            'password2'
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['first_name'].label = 'Nome'
         self.fields['first_name'].required = True
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.role = 'usuario'
-        user.aprovado = False
-        if commit:
-            user.save()
-        return user
-
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -29,17 +31,28 @@ class UsuarioRegistroForm(UserCreationForm):
         if commit:
             user.save()
         return user
-
+    
 class UsuarioForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'cpf', 'telefone', 'endereco', 'role', 'aprovado', 'pix']
-        # Para encarregado/gestor criar/editar usuários
+        fields = [
+            'username',
+            'first_name',
+            'cpf',
+            'telefone',
+            'endereco',
+            'role',
+            'aprovado',
+            'pix'
+        ]
 
 class LocalForm(forms.ModelForm):
     class Meta:
         model = Local
-        fields = ['nome', 'descricao']
+        fields = [
+            'nome',
+            'descricao',
+        ]
 
 class PresencaForm(forms.Form):
     # Formulário dinâmico para cada usuário em uma chamada
@@ -48,7 +61,11 @@ class PresencaForm(forms.Form):
 class ChamadaForm(forms.ModelForm):
     class Meta:
         model = Chamada
-        fields = ['data']
+        fields = [
+            'data',
+            'setor',
+            'filial'
+        ]
         widgets = {
             'data': forms.DateInput(attrs={'type': 'date'}),
         }

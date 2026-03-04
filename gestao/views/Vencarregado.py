@@ -51,10 +51,17 @@ def usuario_create(request):
             user.set_password(form.cleaned_data['password']) if 'password' in form.cleaned_data else None
             # Se encarregado criar, já pode aprovar?
             # Vamos deixar aprovado se o criador for encarregado
+            # 📌 Herdar estrutura do criador
+            user.filial = request.user.filial
+            user.setor = request.user.setor
+           # if request.user.role == 'encarregado':
+            #    user.role = 'usuario'
+
             if request.user.role == 'encarregado':
                 user.aprovado = True
                 user.aprovado_por = request.user
                 user.aprovado_em = timezone.now()
+                
             user.save()
             messages.success(request, 'Usuário criado com sucesso.')
             return redirect('usuario_list')
@@ -86,7 +93,10 @@ def local_create(request):
     if request.method == 'POST':
         form = LocalForm(request.POST)
         if form.is_valid():
-            form.save()
+            local = form.save(commit=False)
+            local.filial = request.user.filial
+            local.setor = request.user.setor
+            local.save()
             messages.success(request, 'Local criado.')
             return redirect('local_list')
     else:
@@ -128,6 +138,10 @@ def chamada_create(request):
     if request.method == 'POST':
         form = ChamadaForm(request.POST)
         if form.is_valid():
+            chamada = form.save(commit=False)
+            chamada.filial = request.user.filial
+            chamada.setor = request.user.setor
+
             data = form.cleaned_data['data']
             if not data:
                 messages.error(request, 'A data é obrigatória.')

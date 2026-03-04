@@ -4,8 +4,8 @@ from .models import User, Local, Chamada, Presenca
 
 
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'role', 'plataforma', 'filial', 'aprovado')
-    list_filter = ('role', 'aprovado', 'plataforma', 'filial')
+    list_display = ('username', 'email', 'first_name', 'role', 'setor', 'filial', 'aprovado')
+    list_filter = ('role', 'aprovado', 'setor', 'filial')
 
     fieldsets = UserAdmin.fieldsets + (
         ('Informações Adicionais', {
@@ -18,7 +18,7 @@ class CustomUserAdmin(UserAdmin):
                 'aprovado_por',
                 'aprovado_em',
                 'pix',
-                'plataforma',
+                'setor',
                 'filial',
             )
         }),
