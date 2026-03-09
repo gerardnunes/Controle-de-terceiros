@@ -38,7 +38,9 @@ def register(request):
 @login_required
 @role_required('encarregado', 'gestor')
 def usuario_list(request):
-    usuarios = User.objects.filter(role='usuario')
+    usuarios = User.objects.filter(role='usuario',
+                                   setor=request.user.setor,
+                                   filial=request.user.filial)
     return render(request, 'encarregado/usuario_list.html', {'usuarios': usuarios})
 
 @login_required
@@ -84,7 +86,10 @@ def usuario_aprovar(request, pk):
 @login_required
 @role_required('encarregado')
 def local_list(request):
-    locais = Local.objects.all()
+    locais = Local.objects.filter(
+        filial=request.user.filial,
+        setor=request.user.setor
+    )
     return render(request, 'encarregado/local_list.html', {'locais': locais})
 
 @login_required
@@ -162,8 +167,14 @@ def chamada_create(request):
             chamada = form.save(commit=False)
             chamada.encarregado = request.user
             chamada.save()
-            # Processar presenças
+
+            usuarios = User.objects.filter(
+                id__in=usuarios_ids,
+                filial_id=request.POST.get('filial'),
+                setor_id=request.POST.get('setor')
+            )
             usuarios_ids = request.POST.getlist('usuarios')
+
             for uid in usuarios_ids:
                 local_id = request.POST.get(f'local_{uid}')
                 #adicionei validação de local,
@@ -195,7 +206,7 @@ def chamada_create(request):
             return redirect('chamada_list')
     else:
         form = ChamadaForm(initial={'data': timezone.now().date()})
-        usuarios_aprovados = User.objects.filter(role='usuario', aprovado=True)
+        usuarios_aprovados = User.objects.filter(role='usuario', setor=request.user.setor, aprovado=True, filial=request.user.filial)
         locais = Local.objects.all()
         return render(request, 'encarregado/chamada_form.html', {
             'form': form,
@@ -207,110 +218,98 @@ def chamada_create(request):
 @role_required('encarregado')
 def chamada_detail(request, pk):
     chamada = get_object_or_404(Chamada, pk=pk, encarregado=request.user)
-    presencas = chamada.presencas.all()
+    presencas = chamada.presencas.all(filter(local__filial=request.user.filial, local_setor=request.user.setor))
     return render(request, 'encarregado/chamada_detail.html', {'chamada': chamada, 'presencas': presencas})
 
-
-
 def dashboard_encarregado(request):
+
     hoje = timezone.now().date()
     data_limite_30 = hoje - timedelta(days=30)
-    
-    # KPIs principais
-    usuarios_totais = User.objects.filter(role='usuario').count()
-    usuarios_ativos = User.objects.filter(role='usuario', aprovado=True).count()
-    usuarios_pendentes = User.objects.filter(role='usuario', aprovado=False).count()
-    
-    chamadas_hoje = Chamada.objects.filter(data=hoje).first()
-    total_presentes_hoje = chamadas_hoje.presencas.count() if chamadas_hoje else 0
-    
-    chamadas_pendentes_aprovacao = Chamada.objects.filter(status='pendente').count()
-    
-    # Frequência média últimos 30 dias
-    chamadas_periodo = Chamada.objects.filter(data__gte=data_limite_30)
+
+    usuarios_qs = User.objects.filter(
+        role='usuario',
+        #filial=request.user.filial,
+        setor=request.user.setor
+    )
+
+    presencas_qs = Presenca.objects.filter(usuario__in=usuarios_qs)
+
+    usuarios_totais = usuarios_qs.count()
+    usuarios_ativos = usuarios_qs.filter(aprovado=True).count()
+    usuarios_pendentes = usuarios_qs.filter(aprovado=False).count()
+
+    chamadas_hoje = Chamada.objects.filter(
+        data=hoje,
+        filial=request.user.filial,
+        setor=request.user.setor
+    ).first()
+
+    total_presentes_hoje = presencas_qs.filter(
+        chamada=chamadas_hoje
+    ).count() if chamadas_hoje else 0
+
+    chamadas_pendentes_aprovacao = Chamada.objects.filter(
+        status='pendente',
+        filial=request.user.filial,
+        setor=request.user.setor
+    ).count()
+
+    chamadas_periodo = Chamada.objects.filter(
+        data__gte=data_limite_30,
+        filial=request.user.filial,
+        setor=request.user.setor
+    )
+
     total_dias_periodo = chamadas_periodo.dates('data', 'day').count()
+
     if total_dias_periodo > 0 and usuarios_ativos > 0:
-        total_presencas_periodo = Presenca.objects.filter(chamada__data__gte=data_limite_30).count()
+
+        total_presencas_periodo = presencas_qs.filter(
+            chamada__data__gte=data_limite_30
+        ).count()
+
         frequencia_media = (total_presencas_periodo / (usuarios_ativos * total_dias_periodo)) * 100
+
     else:
         frequencia_media = 0
-    
-    # Gráfico de tendência (últimos 30 dias)
+
     datas = []
     presencas_dia = []
+
     for i in range(30):
-        dia = hoje - timedelta(days=29 - i)  # para ir do mais antigo ao mais recente
+
+        dia = hoje - timedelta(days=29 - i)
+
         datas.append(dia.strftime('%d/%m'))
-        chamada_dia = Chamada.objects.filter(data=dia).first()
-        count = chamada_dia.presencas.count() if chamada_dia else 0
+
+        chamada_dia = Chamada.objects.filter(
+            data=dia,
+            filial=request.user.filial,
+            setor=request.user.setor
+        ).first()
+
+        count = presencas_qs.filter(chamada=chamada_dia).count() if chamada_dia else 0
+
         presencas_dia.append(count)
-    
-    # Distribuição por setor (últimos 30 dias)
+
     setores = []
-    for local in Local.objects.all():
-        count = Presenca.objects.filter(
+
+    for local in Local.objects.filter(
+        filial=request.user.filial,
+        setor=request.user.setor
+    ):
+
+        count = presencas_qs.filter(
             local=local,
             chamada__data__gte=data_limite_30
         ).count()
+
         if count > 0:
-            setores.append({'nome': local.nome, 'total': count})
-    
-    # Top 5 funcionários com mais presenças
-    top_funcionarios = []
-    for usuario in User.objects.filter(role='usuario', aprovado=True):
-        presencas = Presenca.objects.filter(
-            usuario=usuario,
-            chamada__data__gte=data_limite_30
-        ).count()
-        top_funcionarios.append({
-            'nome': usuario.get_full_name() or usuario.username,
-            'presencas': presencas
-        })
-    top_funcionarios = sorted(top_funcionarios, key=lambda x: x['presencas'], reverse=True)[:5]
-    
-    # Chamadas pendentes de aprovação (últimas 5)
-    chamadas_pendentes = Chamada.objects.filter(status='pendente').order_by('-data')[:5]
-    chamadas_hoje = Chamada.objects.filter(data=hoje).first()
-    # Mapa de calor (presenças por dia da semana)
-    dias_semana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
-    calor_data = []
-    for usuario in User.objects.filter(role='usuario', aprovado=True)[:10]:  # limitar para não pesar
-        linha = {'nome': usuario.username, 'dias': []}
-        for i in range(7):
-            count = Presenca.objects.filter(
-                usuario=usuario,
-                chamada__data__gte=data_limite_30,
-                chamada__data__week_day=i+2  # no Django, segunda=2, domingo=1
-            ).count()
-            linha['dias'].append(count)
-        calor_data.append(linha)
-    
-    # Previsão para amanhã (média dos últimos 7 dias no mesmo dia da semana)
-    amanha = hoje + timedelta(days=1)
-    dia_semana_amanha = amanha.weekday()  # 0=segunda, 6=domingo
-    inicio_7_dias = hoje - timedelta(days=7)
+            setores.append({
+                'nome': local.nome,
+                'total': count
+            })
 
-    chamadas_7_dias = (
-        Chamada.objects
-        .filter(data__gte=inicio_7_dias, status='aprovado')
-        .prefetch_related('presencas')
-    )
-
-    total_presencas = sum(
-        ch.presencas.count() for ch in chamadas_7_dias
-    )
-
-    previsao = round(total_presencas / 7) if total_presencas else 0
-
-    # Timeline de atividades (últimas 5 chamadas criadas)
-    atividades = []
-    for chamada in Chamada.objects.order_by('-criado_em')[:5]:
-        atividades.append({
-            'tipo': 'chamada',
-            'descricao': f"Chamada de {chamada.data.strftime('%d/%m')}: {chamada.presencas.count()} presenças",
-            'data': chamada.criado_em
-        })
-    
     context = {
         'chamadas_hoje': chamadas_hoje,
         'usuarios_totais': usuarios_totais,
@@ -322,14 +321,10 @@ def dashboard_encarregado(request):
         'datas': json.dumps(datas),
         'presencas_dia': json.dumps(presencas_dia),
         'setores': setores,
-        'top_funcionarios': top_funcionarios,
-        'chamadas_pendentes': chamadas_pendentes,
-        'calor_data': calor_data,
-        'dias_semana': dias_semana,
-        'previsao': previsao,
-        'atividades': atividades,
     }
+
     return render(request, 'encarregado/dashboard.html', context)
+
 VALOR_POR_CHAMADA = 120
 
 def voltar_dias_uteis(data, dias_uteis):
@@ -358,7 +353,7 @@ def dashboard(request):
         # 🔹 Faturamento do mês agrupado por LOCAL + ENCARREGADO
         chamadas_mes = (
             Chamada.objects
-            .filter(data__gte=inicio_mes, status='aprovado')
+            .filter(data__gte=inicio_mes, status='aprovado', filial=request.user.filial, setor=request.user.setor,)
             .values(
                 'presencas__local__nome',
                 'encarregado__first_name',
@@ -376,7 +371,7 @@ def dashboard(request):
 
         total_geral_mes = (
             Chamada.objects
-            .filter(data__gte=inicio_mes, status='aprovado')
+            .filter(data__gte=inicio_mes, status='aprovado', filial=request.user.filial, setor=request.user.setor)
             .annotate(total=Count('presencas') * VALOR_POR_CHAMADA)
             .aggregate(total=Sum('total'))['total'] or 0
         )
@@ -384,7 +379,7 @@ def dashboard(request):
         # 🔹 Últimos 15 dias
         chamadas_quinzena = (
             Chamada.objects
-            .filter(data__gte=inicio_quinzena, status='aprovado')
+            .filter(data__gte=inicio_quinzena, status='aprovado', filial=request.user.filial, setor=request.user.setor)
             .prefetch_related('presencas__local')
             .select_related('encarregado')
             .order_by('-data')
@@ -396,7 +391,7 @@ def dashboard(request):
         )
 
         # 🔹 Pendentes
-        chamadas_pendentes = Chamada.objects.filter(status='pendente')
+        chamadas_pendentes = Chamada.objects.filter(status='pendente', filial=request.user.filial, setor=request.user.setor)
 
         context = {
             'chamadas': chamadas_pendentes,

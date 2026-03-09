@@ -33,6 +33,8 @@ def exportar_quinzena_excel(request):
     hoje = timezone.now().date()
     quinze_dias_atras = hoje - timedelta(days=15)
     chamadas = Chamada.objects.filter(
+        filial=request.user.filial,
+        setor=request.user.setor,
         data__gte=quinze_dias_atras,
         status='aprovadas'
     ).select_related('encarregado').order_by('-data')
@@ -89,7 +91,7 @@ def exportar_quinzena_excel(request):
 @login_required
 @role_required('gerente')
 def gerente_chamada_detail(request, pk):
-    chamada = get_object_or_404(Chamada, pk=pk)
+    chamada = get_object_or_404(Chamada, pk=pk, filial=request.user.filial, setor=request.user.setor)
     if request.method == 'POST':
         acao = request.POST.get('acao')
         if acao == 'aprovar':
@@ -129,11 +131,15 @@ def relatorio(request):
     # Filtrar chamadas concluídas no período
 
     chamadas = Chamada.objects.filter(
+        filial=request.user.filial,
+        setor=request.user.setor,
         data__range=[inicio, fim],# ajuste conforme seu modelo
     ).select_related('encarregado')
     VALOR_POR_CHAMADA = 120
 
     chamadas = Chamada.objects.filter(
+        filial=request.user.filial,
+        setor=request.user.setor,
         data__range=[inicio, fim],
         status='aprovado'  # recomendo filtrar só aprovadas
     ).prefetch_related('presencas__usuario')
@@ -163,6 +169,8 @@ def relatorio(request):
     for item in dados_agrupados:
         # Dias trabalhados: contar dias distintos em que o usuário teve chamadas
         dias_trabalhados = chamadas.filter(
+            filial=request.user.filial,
+            setor=request.user.setor,
             presencas__usuario__id=item['presencas__usuario__id']
         ).values('data').distinct().count()
 
@@ -224,6 +232,8 @@ def exportar_relatorio_excel(request):
 
     # Buscar chamadas
     chamadas = Chamada.objects.filter(
+        filial=request.user.filial,
+        setor=request.user.setor,
         data__range=[inicio, fim],
         status='aprovado'
     ).prefetch_related('presencas__usuario')
@@ -269,7 +279,9 @@ def exportar_relatorio_excel(request):
         usuario_id = item['presencas__usuario__id']
         local = item['presencas__local__nome']
         dias_trabalhados = chamadas.filter(
-            presencas__usuario__id=usuario_id
+            presencas__usuario__id=usuario_id,
+            filial=request.user.filial,
+            setor=request.user.setor
         ).values('data').distinct().count()
 
         nome = f"{item['presencas__usuario__first_name']} {item['presencas__usuario__last_name']}"

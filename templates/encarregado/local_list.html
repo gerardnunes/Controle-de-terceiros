@@ -7,6 +7,7 @@
         <tr>
             <th>Nome</th>
             <th>Descrição</th>
+            <th>Setor</th>
             <th>Ações</th>
         </tr>
     </thead>
@@ -15,6 +16,7 @@
         <tr>
             <td>{{ local.nome }}</td>
             <td>{{ local.descricao }}</td>
+            <td>{{ local.setor }}</td>
             <td>
                 <a href="{% url 'local_edit' local.id %}" class="btn btn-sm btn-warning">Editar</a>
                 <a href="{% url 'local_delete' local.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Remover</a>

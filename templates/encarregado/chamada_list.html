@@ -9,6 +9,7 @@
             <th>Status</th>
             <th>Criada em</th>
             <th>Ações</th>
+            <th>Setor</th>
         </tr>
     </thead>
     <tbody>
@@ -18,6 +19,7 @@
             <td>{{ chamada.get_status_display }}</td>
             <td>{{ chamada.criado_em|date:"d/m/Y H:i" }}</td>
             <td><a href="{% url 'chamada_detail' chamada.id %}" class="btn btn-sm btn-info">Detalhes</a></td>
+            <td>{{ chamada.setor }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="4">Nenhuma chamada encontrada.</td></tr>
