@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Gerenciamento de Usuários</h2>
+
+<div class="card mb-4">
+<div class="card-body">
+
+<form method="get" class="row g-3">
+
+<div class="col-md-4">
+<label class="form-label">Filial</label>
+
+<select name="filial" class="form-select">
+<option value="">Todas</option>
+
+{% for filial in filiais %}
+<option value="{{ filial }}"
+{% if request.GET.filial == filial %}selected{% endif %}>
+{{ filial }}
+</option>
+{% endfor %}
+
+</select>
+</div>
+
+<div class="col-md-4">
+<label class="form-label">Setor</label>
+
+<select name="setor" class="form-select">
+<option value="">Todos</option>
+
+{% for setor in setor %}
+<option value="{{ setor }}"
+{% if request.GET.setor == setor %}selected{% endif %}>
+{{ setor }}
+</option>
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-4 d-flex align-items-end">
+<button type="submit" class="btn btn-primary me-2">Filtrar</button>
+<a href="{% url 'usuario_list' %}" class="btn btn-secondary">Limpar</a>
+</div>
+
+</form>
+
+</div>
+</div>
+
+
+<div class="mb-3">
+<a href="{% url 'usuario_creat' %}" class="btn btn-success">Novo Usuário</a>
+</div>
+
+
+<table class="table table-striped">
+
+<thead>
+<tr>
+<th>Nome</th>
+<th>Email</th>
+<th>Filial</th>
+<th>Setor</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for usuario in usuarios %}
+
+<tr>
+<td>{{ usuario.username }}</td>
+<td>{{ usuario.email }}</td>
+<td>{{ usuario.filial|default:"-" }}</td>
+<td>{{ usuario.setor|default:"-" }}</td>
+
+<td>
+<a href="" class="btn btn-sm btn-warning">Editar</a>
+<a href="" class="btn btn-sm btn-danger">Remover</a>
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="5" class="text-center">Nenhum usuário encontrado</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endblock %}

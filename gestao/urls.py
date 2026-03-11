@@ -1,6 +1,10 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
+from .views.Vadm import (
+    usuario_creat,
+    usuario_lis,
+)
 from .views.Vgerente import (
     exportar_quinzena_excel,
     exportar_relatorio_excel,
@@ -43,6 +47,7 @@ from .views.Vgestor import (
 
 
 urlpatterns = [
+    
     #export do gestor
     path(
         'gestor/chamada_detailG/<int:pk>/',
@@ -82,6 +87,8 @@ urlpatterns = [
     ),
 
     # Usuários
+    path('ADM/novo/', usuario_creat, name='usuario_creat'),
+    path('ADM/usuarios/', usuario_lis, name='usuario_lis'),
     path('encarregado/usuarios/', usuario_list, name='usuario_list'),
     path('encarregado/usuarios/novo/', usuario_create, name='usuario_create'),
     path(

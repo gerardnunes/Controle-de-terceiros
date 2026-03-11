@@ -3,6 +3,31 @@ from itertools import count
 from pyexpat.errors import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
+from flask import request
+from pytz import timezone
+from django.utils import timezone
+import json
+from django.db.models import Count, Sum, F, DecimalField, ExpressionWrapper
+from datetime import timedelta
+from django.utils import timezone
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Count, F, DecimalField, ExpressionWrapper
+from django.contrib import messages
+from streamlit import user
+
+
+from gestao.decorators import role_required
+from gestao.forms import ChamadaForm, LocalForm, UsuarioForm, UsuarioRegistroForm
+from gestao.models import Chamada, Local, Presenca, User
+# Página inicial
+
+
+from datetime import timedelta
+from itertools import count
+from pyexpat.errors import messages
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import login_required
 from pytz import timezone
 from django.utils import timezone
 import json
@@ -19,57 +44,54 @@ from gestao.decorators import role_required
 from gestao.forms import ChamadaForm, LocalForm, UsuarioForm, UsuarioRegistroForm
 from gestao.models import Chamada, Local, Presenca, User
 # Página inicial
-def index(request):
-    return render(request, 'index.html')
 
-# Registro de usuário
-def register(request):
-    if request.method == 'POST':
-        form = UsuarioRegistroForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            messages.success(request, 'Cadastro realizado. Aguarde aprovação do encarregado.')
-            return redirect('login')
-    else:
-        form = UsuarioRegistroForm()
-    return render(request, 'registration/register.html', {'form': form})
 
  
 @login_required
-@role_required('encarregado', 'gestor')
-def usuario_list(request):
-    usuarios = User.objects.filter(role='usuario',
-                                   setor=request.user.setor,
-                                   filial=request.user.filial)
-    return render(request, 'encarregado/usuario_list.html', {'usuarios': usuarios})
+@role_required('administrador')
+def usuario_lis(request):
+    usuarios = User.objects.filter(role='usuario')
+    chamadas_pendentes = Chamada.objects.filter(status='pendente', filial=request.user.filial, setor=request.user.setor)
+    filiais = User.objects.values_list('filial', flat=True).distinct()
+    setor = User.objects.values_list('setor', flat=True).distinct()
+    print(filiais)
+    print(setor)
+    context = {
+            'setor':setor,
+            'filiais':filiais,
+            'usuarios': usuarios,
+            'chamadas_pendentes': chamadas_pendentes
+        }
+
+    return render(request, 'ADM/Painel.html', context)
 
 @login_required
-@role_required('encarregado', 'gestor')
-def usuario_create(request):
+@role_required('administrador')
+def usuario_creat(request):
     if request.method == 'POST':
         form = UsuarioForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password']) if 'password' in form.cleaned_data else None
-            # Se encarregado criar, já pode aprovar?
-            # Vamos deixar aprovado se o criador for encarregado
-            # 📌 Herdar estrutura do criador
-            user.filial = request.user.filial
-            user.setor = request.user.setor
-           # if request.user.role == 'encarregado':
-            #    user.role = 'usuario'
+            password = request.POST.get("senha")
+            if password:
+                user.set_password(password)
 
-            if request.user.role == 'encarregado':
+            user.filial = request.POST.get('filial')
+            user.setor = request.POST.get('setor')
+
+            if request.user.role == 'administrador':
                 user.aprovado = True
                 user.aprovado_por = request.user
                 user.aprovado_em = timezone.now()
                 
             user.save()
             messages.success(request, 'Usuário criado com sucesso.')
-            return redirect('usuario_list')
+            print(request.user.role)
+            return redirect('usuario_lis')
     else:
+        print(request.user.role)
         form = UsuarioForm()
-    return render(request, 'encarregado/usuario_form.html', {'form': form})
+    return render(request, 'ADM/usuario_create.html', {'form': form})
 
 @login_required
 @role_required('encarregado')
@@ -456,14 +478,8 @@ def dashboard(request):
         }
 
         return render(request, 'gestor/dashboard.html', context)
-    elif role == 'administrador':
-        usuarios = User.objects.filter(role='usuario',
-                                   setor=request.user,
-                                   filial=request.user)
-        return render(request, 'ADM/painel.html', {'usuarios': usuarios})
-  # usuario
-    else:
+    else:  # usuario
+        
         return render(request, 'usuario/perfil.html')
-    
     
 
